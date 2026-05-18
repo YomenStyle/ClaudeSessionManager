@@ -89,11 +89,13 @@ public partial class SessionSidebar : UserControl
         }
     }
 
-    private void OnSessionSelected(object sender, SelectionChangedEventArgs e)
+    private async void OnSessionSelected(object sender, SelectionChangedEventArgs e)
     {
         if (SessionList.SelectedItem is not SessionListItem item) return;
         var panel = App.ActivePanel;
         if (panel == null) return;
+        panel.SendInput("/exit\r");
+        await Task.Delay(1500);
         panel.SendInput($"claude --resume {item.Source.SessionId}\r");
         SessionList.SelectedItem = null;
     }
