@@ -1,0 +1,25 @@
+# Build output
+bin/
+obj/
+*.user
+*.suo
+
+# Claude Code local config
+.claude/
+
+# IDE
+.vs/
+.vscode/
+.idea/
+
+# Logs
+debug.log
+*.log
+
+# OS
+Thumbs.db
+Desktop.ini
+
+# Temp
+*.tmp
+*~
