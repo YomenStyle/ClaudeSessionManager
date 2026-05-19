@@ -61,6 +61,16 @@ function initTerm(cfg) {
         }
     });
     term.unicode.activeVersion = '11';
+    term.attachCustomKeyEventHandler(function(e) {
+        if (e.type !== 'keydown') return true;
+        if (e.ctrlKey && !e.altKey && (e.key === 'v' || e.key === 'V')) {
+            if (e.preventDefault) e.preventDefault();
+            if (e.stopPropagation) e.stopPropagation();
+            post({ type: 'paste-request' });
+            return false;
+        }
+        return true;
+    });
     resizeDebounceMs = cfg.resizeDebounceMs || 150;
     term.onData(function(d) { post({ type: 'input', data: d }); });
     try {

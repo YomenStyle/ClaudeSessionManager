@@ -59,6 +59,24 @@ public partial class ConsoleTabHost : UserControl {
                 FirstTab = panel;
                 PendingFirstTabCwd = null;
                 PendingFirstTabRunOnStart = null;
+            } else {
+                // 후속 탭: 같은 호스트의 가장 최근 콘솔 탭 CWD 상속
+                string? inheritedCwd = null;
+                for (int i = Tabs.Items.Count - 1; i >= 0; i--) {
+                    if (Tabs.Items[i] is TabItem prevTab && prevTab != _plusTab && prevTab.Content is WebTerminalPanel prevPanel) {
+                        inheritedCwd = prevPanel.LastCwd ?? prevPanel.InitialCwd;
+                        if (!string.IsNullOrWhiteSpace(inheritedCwd)) break;
+                    }
+                }
+                if (string.IsNullOrWhiteSpace(inheritedCwd)) {
+                    var lastCwds = App.Settings.Terminal.LastCwds;
+                    if (HostIndex >= 0 && HostIndex < lastCwds.Length) {
+                        var c = lastCwds[HostIndex];
+                        if (!string.IsNullOrWhiteSpace(c)) inheritedCwd = c;
+                    }
+                }
+                if (!string.IsNullOrWhiteSpace(inheritedCwd)) panel.InitialCwd = inheritedCwd;
+                panel.PanelIndex = HostIndex;
             }
             var tab = new TabItem {
                 Header = CreateTabHeader($"PS {_tabCounter}", out Button closeBtn),
@@ -130,6 +148,7 @@ public partial class ConsoleTabHost : UserControl {
         if (Tabs.SelectedItem is System.Windows.Controls.TabItem ti && ti.Content is WebTerminalPanel panel)
         {
             App.SetActivePanel(panel);
+            panel.FocusWebView();
         }
     }
 

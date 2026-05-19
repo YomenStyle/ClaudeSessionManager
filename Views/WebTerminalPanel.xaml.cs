@@ -54,6 +54,23 @@ public partial class WebTerminalPanel : UserControl
         try
         {
             await WebView.EnsureCoreWebView2Async(App.SharedWebView2Env);
+            try
+            {
+                var origin = $"https://{App.Settings.Terminal.VirtualHost}";
+                await WebView.CoreWebView2.Profile.SetPermissionStateAsync(
+                    Microsoft.Web.WebView2.Core.CoreWebView2PermissionKind.ClipboardRead,
+                    origin,
+                    Microsoft.Web.WebView2.Core.CoreWebView2PermissionState.Allow);
+            }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"SetPermissionState failed: {ex.Message}"); }
+            WebView.CoreWebView2.PermissionRequested += (s, args) =>
+            {
+                if (args.PermissionKind == Microsoft.Web.WebView2.Core.CoreWebView2PermissionKind.ClipboardRead)
+                {
+                    args.State = Microsoft.Web.WebView2.Core.CoreWebView2PermissionState.Allow;
+                    args.SavesInProfile = true;
+                }
+            };
             _coreWebView2Ready = true;
         }
         catch (Exception ex)
@@ -112,6 +129,20 @@ public partial class WebTerminalPanel : UserControl
                     break;
                 case "focus":
                     App.SetActivePanel(this);
+                    break;
+                case "paste-request":
+                    try
+                    {
+                        if (System.Windows.Clipboard.ContainsText())
+                        {
+                            var clip = System.Windows.Clipboard.GetText();
+                            if (!string.IsNullOrEmpty(clip))
+                            {
+                                _terminal?.WriteToPseudoConsole(clip);
+                            }
+                        }
+                    }
+                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"paste-request failed: {ex.Message}"); }
                     break;
                 case "resize":
                     DiagLog("WebMsg resize");
@@ -257,6 +288,11 @@ public partial class WebTerminalPanel : UserControl
             WebView.CoreWebView2.PostWebMessageAsString(json);
         }
         catch { }
+    }
+
+    public void FocusWebView()
+    {
+        try { WebView?.Focus(); } catch { }
     }
 
     public void SendInput(string text)
