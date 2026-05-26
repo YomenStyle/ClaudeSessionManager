@@ -69,6 +69,21 @@ function initTerm(cfg) {
             post({ type: 'paste-request' });
             return false;
         }
+        if (e.ctrlKey && !e.altKey && !e.shiftKey && (e.key === 'c' || e.key === 'C')) {
+            try {
+                if (term && term.hasSelection && term.hasSelection()) {
+                    var sel = term.getSelection ? term.getSelection() : '';
+                    if (sel && sel.length > 0) {
+                        if (e.preventDefault) e.preventDefault();
+                        if (e.stopPropagation) e.stopPropagation();
+                        post({ type: 'copy-request', text: sel });
+                        if (term.clearSelection) term.clearSelection();
+                        return false;
+                    }
+                }
+            } catch (err) { /* fall through to default ETX */ }
+            return true;
+        }
         return true;
     });
     resizeDebounceMs = cfg.resizeDebounceMs || 150;

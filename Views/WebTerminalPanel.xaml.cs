@@ -144,6 +144,20 @@ public partial class WebTerminalPanel : UserControl
                     }
                     catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"paste-request failed: {ex.Message}"); }
                     break;
+                case "copy-request":
+                    try
+                    {
+                        if (root.TryGetProperty("text", out var copyTextEl))
+                        {
+                            var text = copyTextEl.GetString();
+                            if (!string.IsNullOrEmpty(text))
+                            {
+                                System.Windows.Clipboard.SetText(text);
+                            }
+                        }
+                    }
+                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"copy-request failed: {ex.Message}"); }
+                    break;
                 case "resize":
                     DiagLog("WebMsg resize");
                     if (root.TryGetProperty("cols", out var colsEl) && root.TryGetProperty("rows", out var rowsEl))
