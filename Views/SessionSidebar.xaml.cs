@@ -6,9 +6,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
 using ClaudeSessionManager.Wpf.Models;
 using ClaudeSessionManager.Wpf.Services;
+using ClaudeSessionManager.Wpf.Views.Dialogs;
 
 namespace ClaudeSessionManager.Wpf.Views;
 
@@ -21,6 +24,8 @@ public partial class SessionSidebar : UserControl
     private CancellationTokenSource? _scanCts;
     private SidebarSettings _settings = new();
     private bool _suppressSelectionEvent;
+    private const string FallbackSessionTitle = "(제목 없음)";
+    private const string EditTitleErrorCaption = "제목 편집 실패";
 
     public SessionSidebar()
     {
@@ -76,7 +81,7 @@ public partial class SessionSidebar : UserControl
             if (ct.IsCancellationRequested) return;
 
             var items = entries
-                .Select(e => new SessionListItem(FormatRelative(e.LastModified), e.FirstMessage, e))
+                .Select(e => new SessionListItem(e.AiTitle ?? FallbackSessionTitle, e.FirstMessage, e))
                 .ToList();
 
             SessionList.ItemsSource = items;
@@ -89,15 +94,121 @@ public partial class SessionSidebar : UserControl
         }
     }
 
-    private async void OnSessionSelected(object sender, SelectionChangedEventArgs e)
+    private async Task EditTitleAsync(SessionListItem? item)
     {
-        if (SessionList.SelectedItem is not SessionListItem item) return;
+        if (item == null) return;
+        var currentTitle = item.Source.AiTitle ?? string.Empty;
+        var dlg = new EditTitleDialog(currentTitle)
+        {
+            Owner = Window.GetWindow(this)
+        };
+        if (dlg.ShowDialog() != true) return;
+        var newTitle = dlg.ResultTitle;
+        if (string.IsNullOrWhiteSpace(newTitle)) return;
+        if (newTitle == currentTitle) return;
+
+        try
+        {
+            await SessionTitleWriter.AppendTitleAsync(
+                item.Source.FilePath,
+                item.Source.SessionId,
+                newTitle);
+            await RefreshAsync();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[EditTitle.Async FATAL] {ex}");
+            MessageBox.Show(
+                Window.GetWindow(this),
+                ex.Message,
+                EditTitleErrorCaption,
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+    }
+
+    private async void OnEditTitleMenuClick(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var item = (sender as MenuItem)?.DataContext as SessionListItem;
+            System.Diagnostics.Debug.WriteLine($"[EditTitle.MenuClick] sender={sender?.GetType().Name} item={item?.AiTitle ?? "<null>"}");
+            await EditTitleAsync(item);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[EditTitle.MenuClick FATAL] {ex}");
+            MessageBox.Show(Window.GetWindow(this), $"{ex.GetType().Name}: {ex.Message}\n{ex.StackTrace}", "메뉴 클릭 오류", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private async void OnSessionListKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.F2)
+        {
+            e.Handled = true;
+            try
+            {
+                await EditTitleAsync(SessionList.SelectedItem as SessionListItem);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[EditTitle.F2 FATAL] {ex}");
+                MessageBox.Show(Window.GetWindow(this), $"{ex.GetType().Name}: {ex.Message}\n{ex.StackTrace}", "F2 오류", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+    }
+
+    private void OnSessionSelected(object sender, SelectionChangedEventArgs e)
+    {
+        // 선택만 처리. resume은 PreviewMouseLeftButtonDown에서.
+    }
+
+    private void OnSessionListPreviewRightDown(object sender, MouseButtonEventArgs e)
+    {
+        // 우클릭 전용 로직 예약 지점.
+    }
+
+    private static T? FindAncestorOrSelf<T>(DependencyObject? obj) where T : DependencyObject
+    {
+        while (obj != null)
+        {
+            if (obj is T t) return t;
+            obj = VisualTreeHelper.GetParent(obj);
+        }
+        return null;
+    }
+
+    private async Task ResumeSessionAsync(SessionListItem item)
+    {
         var panel = App.ActivePanel;
         if (panel == null) return;
         panel.SendInput("/exit\r");
         await Task.Delay(1500);
         panel.SendInput($"claude --resume {item.Source.SessionId}\r");
-        SessionList.SelectedItem = null;
+    }
+
+    private async void OnSessionListPreviewMouseLeftDown(object sender, MouseButtonEventArgs e)
+    {
+        try
+        {
+            var dep = e.OriginalSource as DependencyObject;
+            var lbItem = FindAncestorOrSelf<ListBoxItem>(dep);
+            if (lbItem == null) return;
+
+            var clicked = lbItem.DataContext as SessionListItem;
+            if (clicked == null) return;
+
+            if (ReferenceEquals(SessionList.SelectedItem, clicked))
+            {
+                e.Handled = true;
+                await ResumeSessionAsync(clicked);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Click.LeftDown FATAL] {ex}");
+        }
     }
 
     private static string FormatRelative(DateTime t)
@@ -110,7 +221,7 @@ public partial class SessionSidebar : UserControl
         return t.ToString("MM-dd HH:mm");
     }
 
-    private sealed record SessionListItem(string DisplayTime, string FirstMessage, SessionEntry Source);
+    private sealed record SessionListItem(string AiTitle, string FirstMessage, SessionEntry Source);
 
     private void RebuildPanelList()
     {

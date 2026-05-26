@@ -12,7 +12,7 @@ namespace ClaudeSessionManager.Wpf.Services;
 
 public class ClaudeSessionScanner
 {
-    private const int MaxScanLines = 50;
+    private const int MaxScanLines = 50;      // firstMessage/gitBranch 스캔 한계
     private const int PreviewLength = 60;
 
     public async Task<IReadOnlyList<SessionEntry>> ScanAsync(string cwd, int maxSessions, CancellationToken ct = default)
@@ -57,12 +57,13 @@ public class ClaudeSessionScanner
         var sessionId = Path.GetFileNameWithoutExtension(fi.Name);
         string firstMessage = string.Empty;
         string? gitBranch = null;
+        string? aiTitle = null;
 
         using var stream = fi.OpenRead();
         using var reader = new StreamReader(stream);
 
         int lineCount = 0;
-        while (!reader.EndOfStream && lineCount < MaxScanLines)
+        while (!reader.EndOfStream)
         {
             var line = await reader.ReadLineAsync();
             lineCount++;
@@ -73,12 +74,15 @@ public class ClaudeSessionScanner
                 using var doc = JsonDocument.Parse(line);
                 var root = doc.RootElement;
 
-                if (gitBranch == null && root.TryGetProperty("gitBranch", out var branchProp))
+                if (lineCount <= MaxScanLines
+                    && gitBranch == null
+                    && root.TryGetProperty("gitBranch", out var branchProp))
                 {
                     gitBranch = branchProp.GetString();
                 }
 
-                if (string.IsNullOrEmpty(firstMessage)
+                if (lineCount <= MaxScanLines
+                    && string.IsNullOrEmpty(firstMessage)
                     && root.TryGetProperty("type", out var typeProp)
                     && typeProp.GetString() == "user"
                     && root.TryGetProperty("message", out var msgProp))
@@ -106,8 +110,13 @@ public class ClaudeSessionScanner
                     }
                 }
 
-                if (!string.IsNullOrEmpty(firstMessage) && gitBranch != null)
-                    break;
+                if (root.TryGetProperty("type", out var typeForAiTitle)
+                    && typeForAiTitle.GetString() == "ai-title"
+                    && root.TryGetProperty("aiTitle", out var aiTitleProp)
+                    && aiTitleProp.ValueKind == JsonValueKind.String)
+                {
+                    aiTitle = aiTitleProp.GetString();
+                }
             }
             catch (JsonException)
             {
@@ -120,6 +129,6 @@ public class ClaudeSessionScanner
 
         firstMessage = firstMessage.Replace("\r", " ").Replace("\n", " ").Trim();
 
-        return new SessionEntry(sessionId, fi.LastWriteTime, firstMessage, fi.FullName, gitBranch);
+        return new SessionEntry(sessionId, fi.LastWriteTime, firstMessage, fi.FullName, gitBranch, aiTitle);
     }
 }

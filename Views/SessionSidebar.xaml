@@ -102,6 +102,13 @@
             </Setter>
         </Style>
 
+        <ContextMenu x:Key="SessionItemContextMenu"
+                     Background="#252526" Foreground="#FFFFFF" BorderBrush="#3F3F46"
+                     DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+            <MenuItem Header="제목 편집 (F2)" Click="OnEditTitleMenuClick"
+                      Background="#252526" Foreground="#FFFFFF"/>
+        </ContextMenu>
+
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -131,6 +138,9 @@
         <ListBox x:Name="SessionList"
                  Grid.Row="1"
                  SelectionChanged="OnSessionSelected"
+                 PreviewKeyDown="OnSessionListKeyDown"
+                 PreviewMouseLeftButtonDown="OnSessionListPreviewMouseLeftDown"
+                 PreviewMouseRightButtonDown="OnSessionListPreviewRightDown"
                  Background="#1E1E1E"
                  Foreground="#DDD"
                  BorderThickness="0"
@@ -140,6 +150,7 @@
                     <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                     <Setter Property="Padding" Value="0"/>
                     <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="ContextMenu" Value="{StaticResource SessionItemContextMenu}"/>
                     <Style.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter Property="Background" Value="#2A2D2E"/>
@@ -153,14 +164,18 @@
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Vertical" Margin="6,4">
-                        <TextBlock Text="{Binding DisplayTime}"
-                                   FontSize="10"
-                                   Opacity="0.7"
-                                   Foreground="#DDD"/>
+                        <TextBlock Text="{Binding AiTitle}"
+                                   FontSize="13"
+                                   FontWeight="SemiBold"
+                                   Opacity="1.0"
+                                   TextTrimming="CharacterEllipsis"
+                                   TextWrapping="NoWrap"
+                                   Foreground="#FFFFFF"/>
                         <TextBlock Text="{Binding FirstMessage}"
                                    TextWrapping="Wrap"
                                    MaxHeight="36"
                                    FontSize="12"
+                                   Opacity="0.7"
                                    Foreground="#DDD"/>
                     </StackPanel>
                 </DataTemplate>
