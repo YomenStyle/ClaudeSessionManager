@@ -211,6 +211,21 @@ public partial class SessionSidebar : UserControl
         }
     }
 
+    private static string FormatCwdShort(string? path)
+    {
+        if (string.IsNullOrEmpty(path)) return "(no cwd)";
+        var trimmed = path.TrimEnd('\\', '/');
+        if (string.IsNullOrEmpty(trimmed)) return path;
+        var parts = trimmed.Split(new[] { '\\', '/' }, StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length > 0 && parts[0].EndsWith(':'))
+        {
+            parts = parts.Skip(1).ToArray();
+        }
+        if (parts.Length == 0) return trimmed;
+        if (parts.Length <= 2) return string.Join("\\", parts);
+        return string.Join("\\", parts.Skip(parts.Length - 2));
+    }
+
     private static string FormatRelative(DateTime t)
     {
         var diff = DateTime.Now - t;
@@ -239,10 +254,7 @@ public partial class SessionSidebar : UserControl
                         if (host.Tabs.Items[ti] is TabItem tabItem && tabItem.Content is WebTerminalPanel p)
                         {
                             var effectiveCwd = p.LastCwd ?? p.InitialCwd ?? "";
-                            var cwdShort = string.IsNullOrEmpty(effectiveCwd)
-                                ? "(no cwd)"
-                                : Path.GetFileName(effectiveCwd.TrimEnd('\\', '/'));
-                            if (string.IsNullOrEmpty(cwdShort)) cwdShort = effectiveCwd;
+                            var cwdShort = FormatCwdShort(effectiveCwd);
                             items.Add(new PanelOption($"분할{hi + 1}/탭{ti + 1} {cwdShort}", p));
                         }
                     }

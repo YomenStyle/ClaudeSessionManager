@@ -86,6 +86,9 @@ public partial class ConsoleTabHost : UserControl {
             int insertIdx = _plusTab != null ? Tabs.Items.IndexOf(_plusTab) : Tabs.Items.Count;
             Tabs.Items.Insert(insertIdx, tab);
             Tabs.SelectedItem = tab;
+            // 새 탭 생성 후 ActivePanel로 즉시 전환 (_isAddingTab 가드로 Tabs_SelectionChanged의 TryActivateCurrentPanel이 차단되므로 명시 호출)
+            App.SetActivePanel(panel);
+            panel.FocusWebView();
         } finally { _isAddingTab = false; }
     }
 
@@ -103,6 +106,9 @@ public partial class ConsoleTabHost : UserControl {
             int insertIdx = _plusTab != null ? Tabs.Items.IndexOf(_plusTab) : Tabs.Items.Count;
             Tabs.Items.Insert(insertIdx, tab);
             Tabs.SelectedItem = tab;
+            // 새 탭 생성 후 ActivePanel로 즉시 전환 (_isAddingTab 가드로 Tabs_SelectionChanged의 TryActivateCurrentPanel이 차단되므로 명시 호출)
+            App.SetActivePanel(panel);
+            panel.FocusWebView();
         } finally { _isAddingTab = false; }
     }
 
