@@ -97,7 +97,10 @@ function initTerm(cfg) {
     } catch (e) { /* xterm focus API 미지원 무시 */ }
     var __termEl = document.getElementById('terminal');
     if (__termEl) {
-        __termEl.addEventListener('mousedown', function() { post({ type: 'focus' }); });
+        __termEl.addEventListener('mousedown', function() {
+            post({ type: 'focus' });
+            try { if (term && term.focus) term.focus(); } catch (e) {}
+        });
     }
     if (term.parser && term.parser.registerOscHandler) {
         term.parser.registerOscHandler(7, function(payload) {
