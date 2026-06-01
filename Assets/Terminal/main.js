@@ -27,7 +27,21 @@ window.chrome.webview.addEventListener('message', function(e) {
     }
 });
 
+const THEMES = {
+    'dark': { background: '#0C0C0C', foreground: '#CCCCCC' },
+    'light+': {
+        background: '#FFFFFF', foreground: '#333333', cursor: '#000000', cursorAccent: '#FFFFFF', selectionBackground: '#ADD6FF',
+        black: '#000000', red: '#CD3131', green: '#00BC00', yellow: '#949800', blue: '#0451A5', magenta: '#BC05BC', cyan: '#0598BC', white: '#555555',
+        brightBlack: '#666666', brightRed: '#CD3131', brightGreen: '#14CE14', brightYellow: '#B5BA00', brightBlue: '#0451A5', brightMagenta: '#BC05BC', brightCyan: '#0598BC', brightWhite: '#767676'
+    }
+};
+
 function initTerm(cfg) {
+    var themeKey = (cfg.theme || '').toLowerCase();
+    var resolvedTheme = THEMES[themeKey] || THEMES['dark'];
+    document.documentElement.style.backgroundColor = resolvedTheme.background;
+    document.body.style.backgroundColor = resolvedTheme.background;
+    document.getElementById('terminal').style.backgroundColor = resolvedTheme.background;
     term = new Terminal({
         allowProposedApi: true,
         screenReaderMode: false,
@@ -35,10 +49,25 @@ function initTerm(cfg) {
         cursorBlink: cfg.cursorBlink,
         fontFamily: cfg.fontFamily,
         fontSize: cfg.fontSize,
-        theme: cfg.theme === 'dark' ? { background: '#0C0C0C', foreground: '#CCCCCC' } : undefined
+        theme: resolvedTheme
     });
     fitAddon = new FitAddon.FitAddon();
     term.loadAddon(fitAddon);
+
+    var primaryFont = (cfg.fontFamily || '').split(',')[0].trim();
+    var fontLoadPromise = (primaryFont
+        ? Promise.all([
+            document.fonts.load("400 1em '" + primaryFont + "'"),
+            document.fonts.load("700 1em '" + primaryFont + "'")
+          ])
+        : Promise.resolve()
+    ).then(function() {
+        return document.fonts.ready;
+    }).catch(function() {
+        // 폰트 로드 실패 시 fallback 폰트로 그대로 진행
+    });
+
+    fontLoadPromise.then(function() {
     term.open(document.getElementById('terminal'));
     fitAddon.fit();
     term.unicode.register({
@@ -125,6 +154,7 @@ function initTerm(cfg) {
             post({ type: 'resize', cols: term.cols, rows: term.rows });
         }, resizeDebounceMs);
     }).observe(document.getElementById('terminal'));
+    }); // end fontLoadPromise.then
 }
 
 post({ type: 'ready' });

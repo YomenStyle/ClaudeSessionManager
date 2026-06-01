@@ -3,9 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:views="clr-namespace:ClaudeSessionManager.Wpf.Views"
         Title="ClaudeSessionManager" Icon="/Assets/app.ico" Width="1280" Height="720"
-        Background="#1E1E1E">
+        Background="{StaticResource WindowBg}">
     <DockPanel>
-        <Border DockPanel.Dock="Top" Background="#2D2D30" BorderBrush="#3F3F46" BorderThickness="0,0,0,1">
+        <Border DockPanel.Dock="Top" Background="{StaticResource ChromeBg}" BorderBrush="{StaticResource ChromeBorder}" BorderThickness="0,0,0,1">
             <TabControl x:Name="ModeTabs"
                         SelectionChanged="ModeTabs_SelectionChanged"
                         SelectedIndex="0"
@@ -19,15 +19,15 @@
                 </TabControl.Template>
                 <TabControl.Resources>
                     <Style TargetType="TabItem">
-                        <Setter Property="Foreground" Value="#CCCCCC"/>
+                        <Setter Property="Foreground" Value="{StaticResource FgPrimary}"/>
                         <Setter Property="Padding" Value="14,6"/>
                         <Setter Property="FontSize" Value="13"/>
                         <Setter Property="Template">
                             <Setter.Value>
                                 <ControlTemplate TargetType="TabItem">
                                     <Border x:Name="Bd"
-                                            Background="#2D2D30"
-                                            BorderBrush="#3F3F46"
+                                            Background="{StaticResource TabInactiveBg}"
+                                            BorderBrush="{StaticResource ChromeBorder}"
                                             BorderThickness="1,1,1,0"
                                             CornerRadius="3,3,0,0"
                                             Margin="0,0,2,0"
@@ -38,12 +38,12 @@
                                     </Border>
                                     <ControlTemplate.Triggers>
                                         <Trigger Property="IsSelected" Value="True">
-                                            <Setter TargetName="Bd" Property="Background" Value="#0E639C"/>
-                                            <Setter Property="Foreground" Value="White"/>
+                                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource AccentBg}"/>
+                                            <Setter Property="Foreground" Value="{StaticResource OnAccentFg}"/>
                                             <Setter Property="FontWeight" Value="Bold"/>
                                         </Trigger>
                                         <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="Bd" Property="Background" Value="#3F3F46"/>
+                                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource TabHoverBg}"/>
                                         </Trigger>
                                     </ControlTemplate.Triggers>
                                 </ControlTemplate>
@@ -60,7 +60,7 @@
         <views:SessionSidebar DockPanel.Dock="Left" x:Name="Sidebar" MinWidth="180"/>
         <GridSplitter DockPanel.Dock="Left" Width="4"
                       HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                      Background="#333" ShowsPreview="True"
+                      Background="{StaticResource ChromeBorder}" ShowsPreview="True"
                       ResizeBehavior="PreviousAndCurrent"/>
         <views:SplitGrid x:Name="SplitArea"/>
     </DockPanel>

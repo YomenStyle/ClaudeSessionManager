@@ -24,12 +24,12 @@ public class TerminalSettings {
     [JsonPropertyName("startupCommand")] public string   StartupCommand { get; set; } = "Remove-Module PSReadLine -ErrorAction SilentlyContinue; Clear-Host";
     [JsonPropertyName("lastCwds")]        public string[] LastCwds       { get; set; } = new string[4];
     [JsonPropertyName("scrollback")]      public int    Scrollback      { get; set; } = 1000;
-    [JsonPropertyName("theme")]           public string Theme           { get; set; } = "dark";
+    [JsonPropertyName("theme")]           public string Theme           { get; set; } = "light+";
     [JsonPropertyName("cursorBlink")]     public bool   CursorBlink     { get; set; } = true;
     [JsonPropertyName("virtualHost")]     public string VirtualHost     { get; set; } = "terminal.local";
     [JsonPropertyName("batchIntervalMs")] public int    BatchIntervalMs { get; set; } = 16;
     [JsonPropertyName("resizeDebounceMs")] public int   ResizeDebounceMs { get; set; } = 150;
-    [JsonPropertyName("fontFamily")]      public string FontFamily      { get; set; } = "Cascadia Mono";
+    [JsonPropertyName("fontFamily")]      public string FontFamily      { get; set; } = "Noto Sans Mono, Cascadia Mono, Consolas, monospace";
     [JsonPropertyName("fontSize")]        public int    FontSize        { get; set; } = 13;
     [JsonPropertyName("onOpenCommand")]   public string OnOpenCommand   { get; set; } = "claude --dangerously-skip-permissions";
 }

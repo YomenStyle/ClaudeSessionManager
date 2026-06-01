@@ -11,18 +11,18 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ToggleButton">
-                        <Border x:Name="Border" Background="#1E1E1E" BorderBrush="#3F3F46" BorderThickness="1" CornerRadius="2">
+                        <Border x:Name="Border" Background="{StaticResource ControlBg}" BorderBrush="{StaticResource ChromeBorder}" BorderThickness="1" CornerRadius="2">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="20"/>
                                 </Grid.ColumnDefinitions>
-                                <Path Grid.Column="1" Fill="#CCCCCC" HorizontalAlignment="Center" VerticalAlignment="Center" Data="M 0 0 L 4 4 L 8 0 Z"/>
+                                <Path Grid.Column="1" Fill="{StaticResource FgPrimary}" HorizontalAlignment="Center" VerticalAlignment="Center" Data="M 0 0 L 4 4 L 8 0 Z"/>
                             </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Border" Property="BorderBrush" Value="#007ACC"/>
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource AccentBg}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -32,9 +32,9 @@
 
         <Style x:Key="DarkComboBox" TargetType="ComboBox">
             <Setter Property="OverridesDefaultStyle" Value="True"/>
-            <Setter Property="Foreground" Value="#FFFFFF"/>
-            <Setter Property="Background" Value="#1E1E1E"/>
-            <Setter Property="BorderBrush" Value="#3F3F46"/>
+            <Setter Property="Foreground" Value="{StaticResource FgPrimary}"/>
+            <Setter Property="Background" Value="{StaticResource ControlBg}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource ChromeBorder}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="6,2"/>
             <Setter Property="SnapsToDevicePixels" Value="True"/>
@@ -51,7 +51,7 @@
                                               IsHitTestVisible="False">
                                 <ContentPresenter.Resources>
                                     <Style TargetType="TextBlock">
-                                        <Setter Property="Foreground" Value="#FFFFFF"/>
+                                        <Setter Property="Foreground" Value="{StaticResource FgPrimary}"/>
                                     </Style>
                                 </ContentPresenter.Resources>
                             </ContentPresenter>
@@ -59,7 +59,7 @@
                                    AllowsTransparency="True" Focusable="False" PopupAnimation="Slide">
                                 <Grid Name="DropDown" SnapsToDevicePixels="True"
                                       MinWidth="{TemplateBinding ActualWidth}" MaxHeight="{TemplateBinding MaxDropDownHeight}">
-                                    <Border Background="#252526" BorderBrush="#3F3F46" BorderThickness="1"/>
+                                    <Border Background="{StaticResource PopupBg}" BorderBrush="{StaticResource ChromeBorder}" BorderThickness="1"/>
                                     <ScrollViewer SnapsToDevicePixels="True">
                                         <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained"/>
                                     </ScrollViewer>
@@ -74,8 +74,8 @@
         <Style x:Key="DarkComboBoxItem" TargetType="ComboBoxItem">
             <Setter Property="OverridesDefaultStyle" Value="True"/>
             <Setter Property="SnapsToDevicePixels" Value="True"/>
-            <Setter Property="Foreground" Value="#FFFFFF"/>
-            <Setter Property="Background" Value="#252526"/>
+            <Setter Property="Foreground" Value="{StaticResource FgPrimary}"/>
+            <Setter Property="Background" Value="{StaticResource PopupBg}"/>
             <Setter Property="Padding" Value="6,4"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -84,17 +84,17 @@
                             <ContentPresenter>
                                 <ContentPresenter.Resources>
                                     <Style TargetType="TextBlock">
-                                        <Setter Property="Foreground" Value="#FFFFFF"/>
+                                        <Setter Property="Foreground" Value="{StaticResource FgPrimary}"/>
                                     </Style>
                                 </ContentPresenter.Resources>
                             </ContentPresenter>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsHighlighted" Value="True">
-                                <Setter TargetName="Border" Property="Background" Value="#094771"/>
+                                <Setter TargetName="Border" Property="Background" Value="{StaticResource ListSelectedBg}"/>
                             </Trigger>
                             <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="Border" Property="Background" Value="#094771"/>
+                                <Setter TargetName="Border" Property="Background" Value="{StaticResource ListSelectedBg}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -103,10 +103,10 @@
         </Style>
 
         <ContextMenu x:Key="SessionItemContextMenu"
-                     Background="#252526" Foreground="#FFFFFF" BorderBrush="#3F3F46"
+                     Background="{StaticResource PopupBg}" Foreground="{StaticResource FgPrimary}" BorderBrush="{StaticResource ChromeBorder}"
                      DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
             <MenuItem Header="제목 편집 (F2)" Click="OnEditTitleMenuClick"
-                      Background="#252526" Foreground="#FFFFFF"/>
+                      Background="{StaticResource PopupBg}" Foreground="{StaticResource FgPrimary}"/>
         </ContextMenu>
 
     </UserControl.Resources>
@@ -126,7 +126,7 @@
                   Style="{StaticResource DarkComboBox}">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding Display}" TextTrimming="CharacterEllipsis" FontSize="11" Foreground="#FFFFFF"/>
+                    <TextBlock Text="{Binding Display}" TextTrimming="CharacterEllipsis" FontSize="11" Foreground="{StaticResource FgPrimary}"/>
                 </DataTemplate>
             </ComboBox.ItemTemplate>
             <ComboBox.ItemContainerStyle>
@@ -141,8 +141,8 @@
                  PreviewKeyDown="OnSessionListKeyDown"
                  PreviewMouseLeftButtonDown="OnSessionListPreviewMouseLeftDown"
                  PreviewMouseRightButtonDown="OnSessionListPreviewRightDown"
-                 Background="#1E1E1E"
-                 Foreground="#DDD"
+                 Background="{StaticResource WindowBg}"
+                 Foreground="{StaticResource FgPrimary}"
                  BorderThickness="0"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
             <ListBox.ItemContainerStyle>
@@ -153,10 +153,11 @@
                     <Setter Property="ContextMenu" Value="{StaticResource SessionItemContextMenu}"/>
                     <Style.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="#2A2D2E"/>
+                            <Setter Property="Background" Value="{StaticResource ListHoverBg}"/>
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Background" Value="#094771"/>
+                            <Setter Property="Background" Value="{StaticResource ListSelectedBg}"/>
+                            <Setter Property="Foreground" Value="{StaticResource FgPrimary}"/>
                         </Trigger>
                     </Style.Triggers>
                 </Style>
@@ -170,13 +171,13 @@
                                    Opacity="1.0"
                                    TextTrimming="CharacterEllipsis"
                                    TextWrapping="NoWrap"
-                                   Foreground="#FFFFFF"/>
+                                   Foreground="{StaticResource FgPrimary}"/>
                         <TextBlock Text="{Binding FirstMessage}"
                                    TextWrapping="Wrap"
                                    MaxHeight="36"
                                    FontSize="12"
                                    Opacity="0.7"
-                                   Foreground="#DDD"/>
+                                   Foreground="{StaticResource FgSecondary}"/>
                     </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>
@@ -187,8 +188,8 @@
                    Grid.Row="2"
                    FontSize="10"
                    Opacity="0.6"
-                   Foreground="#DDD"
+                   Foreground="{StaticResource FgSecondary}"
                    Margin="8,2"
-                   Background="#2D2D30"/>
+                   Background="{StaticResource ChromeBg}"/>
     </Grid>
 </UserControl>
